@@ -2,6 +2,16 @@ from math import atan2, degrees, sqrt
 
 
 def approx_equal(a: float, b: float, threshold: float = 0.0001) -> bool:
+    """Compare to floats and return true if they are approximately equal.
+
+    Args:
+        a (float): first float
+        b (float): second float
+        threshold (float, optional): threshold for being equal. Defaults to 0.0001.
+
+    Returns:
+        bool: true if approximately equal
+    """
     return abs(a - b) < threshold
 
 
@@ -48,6 +58,7 @@ class Box:
             A (Pt): origin point
             B (Pt): next point clockwise
             C (Pt): next point clockwise
+            target (Pt): target location inside box
         """
         self.A = A
         self.B = B
