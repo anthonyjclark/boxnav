@@ -1,14 +1,19 @@
-from math import sin, cos
 from box import Box, Pt
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
 
+def close_enough(A: Pt, B: Pt, threshold: float = 1) -> bool:
+    # TODO: find good threshold value
+    distance = (A - B).magnitude()
+    return distance < threshold
+
+
 class BoxEnv:
     """A simple 2D environment of interconnected boxes."""
 
-    def __init__(self, x: float, y: float, theta: float, boxes: list[Box]) -> None:
+    def __init__(self, boxes: list[Box]) -> None:
         self.boxes = boxes
 
         # Get scale for plotting
@@ -22,13 +27,11 @@ class BoxEnv:
         self.ylim = [min_y - padding, max_y + padding]
         self.scale = 0.4 * min(abs(max_x - min_x), abs(max_y - min_y))
 
-    def in_a_box(self, x: float, y: float) -> bool:
+    def get_boxes(self, pt: Pt) -> list[Box]:
+        return [box for box in self.boxes if box.point_is_inside(pt)]
 
-        for box in self.boxes:
-            if box.point_is_inside(Pt(x, y)):
-                return True
-
-        return False
+    def at_final_target(self, pt: Pt) -> bool:
+        return close_enough(pt, self.boxes[-1].target)
 
     def display(self, ax: plt.Axes) -> None:
         for box in self.boxes:
@@ -49,5 +52,5 @@ class BoxEnv:
 
 if __name__ == "__main__":
     boxes = [Box(Pt(50, 0), Pt(0, 20), Pt(10, 50), Pt(25, 25))]
-    env = BoxEnv(20, 20, 0, boxes)
+    env = BoxEnv(boxes)
     env.test_display()

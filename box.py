@@ -10,15 +10,21 @@ class Pt:
         self.x = x
         self.y = y
 
-    def normalize(self):
-        magnitude = sqrt(self.x * self.x + self.y * self.y)
+    def normalized(self):
+        magnitude = self.magnitude()
         return Pt(self.x / magnitude, self.y / magnitude)
+
+    def magnitude(self) -> float:
+        return sqrt(self.x * self.x + self.y * self.y)
 
     def __mul__(self, scale: float):
         return Pt(self.x * scale, self.y * scale)
 
     def __sub__(self, other):
         return Pt(self.x - other.x, self.y - other.y)
+
+    def __add__(self, other):
+        return Pt(self.x + other.x, self.y + other.y)
 
     def __eq__(self, other) -> bool:
         return approx_equal(self.x, other.x) and approx_equal(self.y, other.y)
