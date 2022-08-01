@@ -1,6 +1,8 @@
 from math import sin, cos
 from box import Box, Pt
-import numpy as np
+
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 
 
 class BoxEnv:
@@ -8,34 +10,17 @@ class BoxEnv:
 
     def __init__(self, x: float, y: float, theta: float, boxes: list[Box]) -> None:
         self.boxes = boxes
-        self.x = x
-        self.y = y
-        self.angle = theta
 
-    def move_forward(self, distance: float) -> None:
-        new_x = self.x + distance * cos(self.angle)
-        new_y = self.y + distance * sin(self.angle)
-        self.move(new_x, new_y)
+        # Get scale for plotting
+        padding = 5
+        min_x = min(min(b.A.x, b.B.x, b.C.x) for b in boxes)
+        max_x = max(max(b.A.x, b.B.x, b.C.x) for b in boxes)
+        min_y = min(min(b.A.y, b.B.y, b.C.y) for b in boxes)
+        max_y = max(max(b.A.y, b.B.y, b.C.y) for b in boxes)
 
-    def move_backward(self, distance: float) -> None:
-        new_x = self.x - distance * cos(self.angle)
-        new_y = self.y - distance * sin(self.angle)
-        self.move(new_x, new_y)
-
-    def move(self, new_x: float, new_y: float) -> None:
-
-        if self.in_a_box(new_x, new_y):
-            self.x = new_x
-            self.y = new_y
-        else:
-            # TODO: project to boundary?
-            raise NotImplemented
-
-    def rotate_right(self, radians: float) -> None:
-        self.angle -= radians
-
-    def rotate_left(self, radians: float) -> None:
-        self.angle -= radians
+        self.xlim = [min_x - padding, max_x + padding]
+        self.ylim = [min_y - padding, max_y + padding]
+        self.scale = 0.4 * min(abs(max_x - min_x), abs(max_y - min_y))
 
     def in_a_box(self, x: float, y: float) -> bool:
 
@@ -45,5 +30,24 @@ class BoxEnv:
 
         return False
 
-    def get_array_to_display(self) -> np.ndarray:
-        raise NotImplemented
+    def display(self, ax: plt.Axes) -> None:
+        for box in self.boxes:
+            rect = Rectangle(
+                box.origin, box.width, box.height, box.angle_degrees, fill=None
+            )
+            ax.add_patch(rect)
+
+        ax.set_xlim(self.xlim)
+        ax.set_ylim(self.ylim)
+        ax.set_aspect("equal")
+
+    def test_display(self) -> None:
+        _, ax = plt.subplots(1, 1)
+        self.display(ax)
+        plt.show()
+
+
+if __name__ == "__main__":
+    boxes = [Box(Pt(50, 0), Pt(0, 20), Pt(10, 50), Pt(25, 25))]
+    env = BoxEnv(20, 20, 0, boxes)
+    env.test_display()

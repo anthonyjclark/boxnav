@@ -1,3 +1,6 @@
+from math import atan2, degrees, sqrt
+
+
 def approx_equal(a: float, b: float, threshold: float = 0.0001) -> bool:
     return abs(a - b) < threshold
 
@@ -6,6 +9,13 @@ class Pt:
     def __init__(self, x: float, y: float) -> None:
         self.x = x
         self.y = y
+
+    def normalize(self):
+        magnitude = sqrt(self.x * self.x + self.y * self.y)
+        return Pt(self.x / magnitude, self.y / magnitude)
+
+    def __mul__(self, scale: float):
+        return Pt(self.x * scale, self.y * scale)
 
     def __sub__(self, other):
         return Pt(self.x - other.x, self.y - other.y)
@@ -19,22 +29,50 @@ def dot(A: Pt, B: Pt):
     return A.x * B.x + A.y * B.y
 
 
+def dist(A: Pt, B: Pt) -> float:
+    """Distance between two points."""
+    return sqrt((A.x - B.x) ** 2 + (A.y - B.y) ** 2)
+
+
 class Box:
-    def __init__(self, A: Pt, B: Pt, C: Pt) -> None:
+    def __init__(self, A: Pt, B: Pt, C: Pt, target: Pt) -> None:
+        """Create a arbitrarily rotated box.
+
+        Args:
+            A (Pt): origin point
+            B (Pt): next point clockwise
+            C (Pt): next point clockwise
+        """
         self.A = A
         self.B = B
         self.C = C
-        self.target = ...
+        self.target = target
 
-        self.AB = self.A - self.B
+        self.AB = self.B - self.A
         self.dotAB = dot(self.AB, self.AB)
 
-        self.BC = self.B - self.C
+        self.BC = self.C - self.B
         self.dotBC = dot(self.BC, self.BC)
 
+    @property
+    def origin(self) -> tuple[float, float]:
+        return self.A.x, self.A.y
+
+    @property
+    def width(self) -> float:
+        return dist(self.B, self.C)
+
+    @property
+    def height(self) -> float:
+        return dist(self.A, self.B)
+
+    @property
+    def angle_degrees(self) -> float:
+        return 180 - degrees(atan2(self.A.x - self.B.x, self.A.y - self.B.y))
+
     def point_is_inside(self, M: Pt) -> bool:
-        AM = self.A - M
-        BM = self.B - M
+        AM = M - self.A
+        BM = M - self.B
         AB = self.AB
         BC = self.BC
         return (0 <= dot(AB, AM) <= self.dotAB) and (0 <= dot(BC, BM) <= self.dotBC)
@@ -43,14 +81,12 @@ class Box:
 if __name__ == "__main__":
     # Test from here: https://stackoverflow.com/questions/2752725/finding-whether-a-point-lies-inside-a-rectangle-or-not
 
+    # Describe box with three points
     A = Pt(5, 0)
     B = Pt(0, 2)
     C = Pt(1, 5)
-    D = Pt(6, 3)  # Redundant point
-
-    box = Box(A, B, C)
-
-    M = Pt(4, 2)
+    ignored_target = Pt(0, 0)
+    box = Box(A, B, C, ignored_target)
 
     AB = B - A
     assert AB == Pt(-5, 2)
@@ -63,6 +99,9 @@ if __name__ == "__main__":
 
     dotBC = dot(BC, BC)
     assert dotBC == 10
+
+    # First point to test (this point is inside the box)
+    M = Pt(4, 2)
 
     AM = M - A
     assert AM == Pt(-1, 2)
@@ -78,6 +117,7 @@ if __name__ == "__main__":
 
     assert box.point_is_inside(M)
 
+    # Second point to test (this point is outside the box)
     M = Pt(6, 1)
 
     AM = M - A
