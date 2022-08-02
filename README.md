@@ -7,7 +7,7 @@ A simple playground for making an agent navigate around some directed corridors 
 Kick off the simulation with:
 
 ~~~bash
-python boxsim.py
+python boxsim.py mp4
 ~~~
 
 Right-handed coordinate system.

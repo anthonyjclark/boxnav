@@ -6,6 +6,7 @@ from celluloid import Camera
 
 import matplotlib.pyplot as plt
 
+from argparse import ArgumentParser
 from math import radians
 
 # TODO: update to reflect OldenborgUE
@@ -15,20 +16,29 @@ boxes = [
     Box(Pt(20, 10), Pt(20, 40), Pt(30, 40), Pt(25, 38)),
 ]
 
-env = BoxEnv(boxes)
-agent = BoxBoyScout(Pt(2, 2), radians(0), env)
 
-# Initiate camera
-fig, ax = plt.subplots()
-camera = Camera(fig)
+def simulate():
+    env = BoxEnv(boxes)
+    agent = BoxBoyScout(Pt(2, 2), radians(0), env)
 
-while not agent.at_final_target():
-    agent.take_action()
+    fig, ax = plt.subplots()
+    camera = Camera(fig)
 
-    env.display(ax)
-    agent.display(ax, env.scale)
-    camera.snap()
+    while not agent.at_final_target():
+        agent.take_action()
 
-plt.show()
-anim = camera.animate()
-anim.save("test.gif")
+        env.display(ax)
+        agent.display(ax, env.scale)
+        camera.snap()
+
+    print("Simulation complete. Now creating output.")
+
+    anim = camera.animate()
+    anim.save("output." + args.save_ext)
+
+
+argparser = ArgumentParser("Navigate around a box environment.")
+argparser.add_argument("save_ext", type=str, help="Extension for output format.")
+args = argparser.parse_args()
+
+simulate()

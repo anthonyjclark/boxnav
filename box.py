@@ -21,6 +21,7 @@ class Pt:
         self.y = y
 
     def xy(self) -> tuple[float, float]:
+        """Return point as a tuple."""
         return (self.x, self.y)
 
     def normalized(self):
@@ -31,10 +32,7 @@ class Pt:
         return sqrt(self.x * self.x + self.y * self.y)
 
     def angle_between(self, other) -> float:
-        # angle = atan2( a.x*b.y - a.y*b.x, a.x*b.x + a.y*b.y );
-        pt1_angle = atan2(self.y, self.x)
-        pt2_angle = atan2(other.y, other.x)
-        return pt2_angle - pt1_angle
+        return atan2(det(self, other), dot(self, other))
 
     def __mul__(self, scale: float):
         return Pt(self.x * scale, self.y * scale)
@@ -52,6 +50,11 @@ class Pt:
 def dot(A: Pt, B: Pt):
     """Scalar product of two points."""
     return A.x * B.x + A.y * B.y
+
+
+def det(A: Pt, B: Pt):
+    """Determinant of two points."""
+    return A.x * B.y - A.y * B.x
 
 
 def dist(A: Pt, B: Pt) -> float:
@@ -159,3 +162,5 @@ if __name__ == "__main__":
     assert dotBCBM == 3
 
     assert not box.point_is_inside(M)
+
+    print("All good.")
