@@ -151,4 +151,5 @@ class BoxWanderer(BoxNavigatorBase):
         super().__init__(position, rotation, env)
 
     def take_action(self) -> None:
+        # return action_taken, correct_action
         raise NotImplemented
