@@ -20,12 +20,21 @@ class Pt:
         self.x = x
         self.y = y
 
+    def xy(self) -> tuple[float, float]:
+        return (self.x, self.y)
+
     def normalized(self):
         magnitude = self.magnitude()
         return Pt(self.x / magnitude, self.y / magnitude)
 
     def magnitude(self) -> float:
         return sqrt(self.x * self.x + self.y * self.y)
+
+    def angle_between(self, other) -> float:
+        # angle = atan2( a.x*b.y - a.y*b.x, a.x*b.x + a.y*b.y );
+        pt1_angle = atan2(self.y, self.x)
+        pt2_angle = atan2(other.y, other.x)
+        return pt2_angle - pt1_angle
 
     def __mul__(self, scale: float):
         return Pt(self.x * scale, self.y * scale)

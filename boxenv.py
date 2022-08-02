@@ -4,12 +4,6 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
 
-def close_enough(A: Pt, B: Pt, threshold: float = 1) -> bool:
-    # TODO: find good threshold value
-    distance = (A - B).magnitude()
-    return distance < threshold
-
-
 class BoxEnv:
     """A simple 2D environment of interconnected boxes."""
 
@@ -30,15 +24,13 @@ class BoxEnv:
     def get_boxes(self, pt: Pt) -> list[Box]:
         return [box for box in self.boxes if box.point_is_inside(pt)]
 
-    def at_final_target(self, pt: Pt) -> bool:
-        return close_enough(pt, self.boxes[-1].target)
-
     def display(self, ax: plt.Axes) -> None:
         for box in self.boxes:
-            rect = Rectangle(
-                box.origin, box.width, box.height, box.angle_degrees, fill=None
+            ax.add_patch(
+                Rectangle(
+                    box.origin, box.width, box.height, box.angle_degrees, fill=None
+                )
             )
-            ax.add_patch(rect)
 
         ax.set_xlim(self.xlim)
         ax.set_ylim(self.ylim)

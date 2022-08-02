@@ -1,5 +1,7 @@
 # BoxNav
 
+![](demo.gif)
+
 A simple playground for making an agent navigate around some directed corridors represented as overlapping boxes.
 
 Kick off the simulation with:
