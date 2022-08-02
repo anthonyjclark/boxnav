@@ -1,7 +1,6 @@
 from box import Box, Pt
 from boxenv import BoxEnv
-from boxnavigator import BoxBoyScout
-
+from boxnavigator import Perfecionist
 from celluloid import Camera
 
 import matplotlib.pyplot as plt
@@ -18,8 +17,9 @@ boxes = [
 
 
 def simulate():
+    """Create and update the box environment and run the navigator."""
     env = BoxEnv(boxes)
-    agent = BoxBoyScout(Pt(2, 2), radians(0), env)
+    agent = Perfecionist(Pt(2, 2), radians(0), env)
 
     fig, ax = plt.subplots()
     camera = Camera(fig)

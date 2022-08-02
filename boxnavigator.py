@@ -1,20 +1,30 @@
 from box import Pt
 from boxenv import BoxEnv
-
 import matplotlib.pyplot as plt
 from matplotlib.patches import Arrow, Wedge
-
 from enum import Enum
 from math import sin, cos, degrees, radians
 
 
 def close_enough(A: Pt, B: Pt, threshold: float = 1) -> bool:
+    """Determine whether Pt A is close enough to Pt B depending on the threshold value.
+
+    Args:
+        A (Pt): First Pt to compare
+        B (Pt): Second Pt to compare
+        threshold (float, optional): How close Pt A has to be to Pt B to be considered "close enough". Defaults to 1.
+
+    Returns:
+        bool: Is Pt A close enough to Pt B given a threshold
+    """
     # TODO: find good threshold value
     distance = (A - B).magnitude()
     return distance < threshold
 
 
 class Action(Enum):
+    """Simple class with 4 possible actions."""
+
     FORWARD = 0
     BACKWARD = 1
     ROTATE_LEFT = 2
@@ -43,16 +53,17 @@ class BoxNavigatorBase:
         self.rotation_increment = radians(2.5)
 
     def at_final_target(self) -> bool:
+        """Is the navigator at the target for the box it is in."""
         return close_enough(self.position, self.env.boxes[-1].target)
 
     def take_action(self) -> tuple[Action, Action]:
         """Execute a single action in the environment.
 
         Raises:
-            NotImplemented: implement in child classes
+            NotImplemented: implement in child classes.
 
         Returns:
-            tuple[Action, Action]: return action taken and correct action
+            tuple[Action, Action]: return action taken and correct action.
         """
         raise NotImplemented
 
@@ -69,7 +80,7 @@ class BoxNavigatorBase:
         self.move(Pt(new_x, new_y))
 
     def move(self, new_pt: Pt) -> None:
-        """Jump to the given position if it is within a box
+        """Jump to the given position if it is within a box.
 
         Args:
             new_pt (Pt): new position
@@ -112,13 +123,25 @@ class BoxNavigatorBase:
         ax.add_patch(Arrow(self.position.x, self.position.y, dxy.x, dxy.y, color="b"))
 
 
-class BoxBoyScout(BoxNavigatorBase):
+class Perfecionist(BoxNavigatorBase):
     """A "perfect" navigator that does not make mistakes."""
 
     def __init__(self, position: Pt, rotation: float, env: BoxEnv) -> None:
+        """Initialize navigator position, initial orientation, and associated Box environment.
+
+        Args:
+            position (Pt): Initial x,y Coordinate for navigator
+            rotation (float): Initial rotation of the navigator
+            env (BoxEnv): Box Environment navigator will operate in
+        """
         super().__init__(position, rotation, env)
 
     def take_action(self) -> tuple[Action, Action]:
+        """Determine appropiate action to take 
+
+        Returns:
+            tuple[Action, Action]: return the action taken and correct action
+        """
         # 1. Update target if needed
         surrounding_boxes = self.env.get_boxes(self.position)
         if close_enough(self.position, self.target) and len(surrounding_boxes) > 1:

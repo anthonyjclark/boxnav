@@ -16,7 +16,15 @@ def approx_equal(a: float, b: float, threshold: float = 0.0001) -> bool:
 
 
 class Pt:
+    """Defines the X and Y values of a point in R^2"""
+
     def __init__(self, x: float, y: float) -> None:
+        """Set this Pt's X and Y values.
+
+        Args:
+            x (float): x-coordinate
+            y (float): y-coordinate
+        """
         self.x = x
         self.y = y
 
@@ -25,25 +33,47 @@ class Pt:
         return (self.x, self.y)
 
     def normalized(self):
+        """Normalize this 2d vector
+
+        Returns:
+            Pt: return a new Pt with normalized x and y values
+        """
         magnitude = self.magnitude()
         return Pt(self.x / magnitude, self.y / magnitude)
 
     def magnitude(self) -> float:
+        """Find the magnitude of this 2D vector
+
+        Returns:
+            float: Magnitude of this 2D vector
+        """
         return sqrt(self.x * self.x + self.y * self.y)
 
     def angle_between(self, other) -> float:
+        """Calculate radian value of the angle between two points.
+
+        Args:
+            other (Pt): point to compare the angle of
+
+        Returns:
+            float: returns radian value of the angle between two points
+        """
         return atan2(det(self, other), dot(self, other))
 
     def __mul__(self, scale: float):
+        """Scale this vector."""
         return Pt(self.x * scale, self.y * scale)
 
     def __sub__(self, other):
+        """substract this point from another."""
         return Pt(self.x - other.x, self.y - other.y)
 
     def __add__(self, other):
+        """add this point to another."""
         return Pt(self.x + other.x, self.y + other.y)
 
     def __eq__(self, other) -> bool:
+        """Does this Pt's X, Y coordinates match close to another Pt."""
         return approx_equal(self.x, other.x) and approx_equal(self.y, other.y)
 
 
@@ -89,17 +119,28 @@ class Box:
 
     @property
     def width(self) -> float:
+        """Width of this box."""
         return dist(self.B, self.C)
 
     @property
     def height(self) -> float:
+        """Height of this box."""
         return dist(self.A, self.B)
 
     @property
     def angle_degrees(self) -> float:
+
         return 180 - degrees(atan2(self.A.x - self.B.x, self.A.y - self.B.y))
 
     def point_is_inside(self, M: Pt) -> bool:
+        """Determine whether the point is inside of this box.
+
+        Args:
+            M (Pt): A 2D point 
+
+        Returns:
+            bool: Whether the Pt is inside this box
+        """
         AM = M - self.A
         BM = M - self.B
         AB = self.AB
