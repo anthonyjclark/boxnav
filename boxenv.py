@@ -16,6 +16,7 @@ class BoxEnv:
         self.boxes = boxes
 
         # Get scale for plotting
+        # TODO: this doesn't work with rotated boxes
         padding = 5
         min_x = min(min(b.A.x, b.B.x, b.C.x) for b in boxes)
         max_x = max(max(b.A.x, b.B.x, b.C.x) for b in boxes)
@@ -62,6 +63,9 @@ class BoxEnv:
 
 
 if __name__ == "__main__":
-    boxes = [Box(Pt(50, 0), Pt(0, 20), Pt(10, 50), Pt(25, 25))]
+    boxes = [
+        Box(Pt(50, 0), Pt(0, 20), Pt(10, 50), Pt(25, 25)),
+        Box(Pt(10, 30), Pt(0, 40), Pt(5, 60), Pt(0, 0)),
+    ]
     env = BoxEnv(boxes)
     env.test_display()
