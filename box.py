@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from math import atan2, degrees, sqrt
 
 
@@ -32,7 +34,7 @@ class Pt:
         """Return point as a tuple."""
         return (self.x, self.y)
 
-    def normalized(self):
+    def normalized(self) -> Pt:
         """Normalize this 2d vector."""
         magnitude = self.magnitude()
         return Pt(self.x / magnitude, self.y / magnitude)
@@ -41,40 +43,40 @@ class Pt:
         """Find the magnitude of this 2D vector."""
         return sqrt(self.x * self.x + self.y * self.y)
 
-    def angle_between(self, other) -> float:
+    def angle_between(self, other: Pt) -> float:
         """Calculate radian value of the angle between two points."""
-        return atan2(det(self, other), dot(self, other))
+        return atan2(Pt.determinant(self, other), Pt.scalar_product(self, other))
 
-    def __mul__(self, scale: float):
+    def __mul__(self, scale: float) -> Pt:
         """Scale this vector."""
         return Pt(self.x * scale, self.y * scale)
 
-    def __sub__(self, other):
+    def __sub__(self, other: Pt) -> Pt:
         """Subtract this point from another."""
         return Pt(self.x - other.x, self.y - other.y)
 
-    def __add__(self, other):
+    def __add__(self, other: Pt) -> Pt:
         """Add this point to another."""
         return Pt(self.x + other.x, self.y + other.y)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Pt) -> bool:
         """Does this Pt's x and y coordinates match close to another Pt."""
         return approx_equal(self.x, other.x) and approx_equal(self.y, other.y)
 
+    @classmethod
+    def scalar_product(cls, A: Pt, B: Pt) -> float:
+        """Scalar product of two points."""
+        return A.x * B.x + A.y * B.y
 
-def dot(A: Pt, B: Pt):
-    """Scalar product of two points."""
-    return A.x * B.x + A.y * B.y
+    @classmethod
+    def determinant(cls, A: Pt, B: Pt) -> float:
+        """Determinant of two points."""
+        return A.x * B.y - A.y * B.x
 
-
-def det(A: Pt, B: Pt):
-    """Determinant of two points."""
-    return A.x * B.y - A.y * B.x
-
-
-def dist(A: Pt, B: Pt) -> float:
-    """Distance between two points."""
-    return sqrt((A.x - B.x) ** 2 + (A.y - B.y) ** 2)
+    @classmethod
+    def distance(cls, A: Pt, B: Pt) -> float:
+        """Distance between two points."""
+        return sqrt((A.x - B.x) ** 2 + (A.y - B.y) ** 2)
 
 
 class Box:
@@ -93,35 +95,36 @@ class Box:
         self.target = target
 
         self.AB = self.B - self.A
-        self.dotAB = dot(self.AB, self.AB)
+        self.dotAB = Pt.scalar_product(self.AB, self.AB)
 
         self.BC = self.C - self.B
-        self.dotBC = dot(self.BC, self.BC)
+        self.dotBC = Pt.scalar_product(self.BC, self.BC)
 
     @property
     def origin(self) -> tuple[float, float]:
+        """Origin of the box (bottom-right corner)."""
         return self.A.x, self.A.y
 
     @property
     def width(self) -> float:
         """Width of this box."""
-        return dist(self.B, self.C)
+        return Pt.distance(self.B, self.C)
 
     @property
     def height(self) -> float:
         """Height of this box."""
-        return dist(self.A, self.B)
+        return Pt.distance(self.A, self.B)
 
     @property
     def angle_degrees(self) -> float:
-
+        """Angle of the box as rotated in the xy-plane."""
         return 180 - degrees(atan2(self.A.x - self.B.x, self.A.y - self.B.y))
 
     def point_is_inside(self, M: Pt) -> bool:
         """Determine whether the point is inside of this box.
 
         Args:
-            M (Pt): A 2D point 
+            M (Pt): A 2D point
 
         Returns:
             bool: Whether the Pt is inside this box
@@ -130,7 +133,9 @@ class Box:
         BM = M - self.B
         AB = self.AB
         BC = self.BC
-        return (0 <= dot(AB, AM) <= self.dotAB) and (0 <= dot(BC, BM) <= self.dotBC)
+        return (0 <= Pt.scalar_product(AB, AM) <= self.dotAB) and (
+            0 <= Pt.scalar_product(BC, BM) <= self.dotBC
+        )
 
 
 if __name__ == "__main__":
@@ -149,10 +154,10 @@ if __name__ == "__main__":
     BC = C - B
     assert BC == Pt(1, 3)
 
-    dotAB = dot(AB, AB)
+    dotAB = Pt.scalar_product(AB, AB)
     assert dotAB == 29
 
-    dotBC = dot(BC, BC)
+    dotBC = Pt.scalar_product(BC, BC)
     assert dotBC == 10
 
     # First point to test (this point is inside the box)
@@ -164,10 +169,10 @@ if __name__ == "__main__":
     BM = M - B
     assert BM == Pt(4, 0)
 
-    dotABAM = dot(AB, AM)
+    dotABAM = Pt.scalar_product(AB, AM)
     assert dotABAM == 9
 
-    dotBCBM = dot(BC, BM)
+    dotBCBM = Pt.scalar_product(BC, BM)
     assert dotBCBM == 4
 
     assert box.point_is_inside(M)
@@ -181,10 +186,10 @@ if __name__ == "__main__":
     BM = M - B
     assert BM == Pt(6, -1)
 
-    dotABAM = dot(AB, AM)
+    dotABAM = Pt.scalar_product(AB, AM)
     assert dotABAM == -3
 
-    dotBCBM = dot(BC, BM)
+    dotBCBM = Pt.scalar_product(BC, BM)
     assert dotBCBM == 3
 
     assert not box.point_is_inside(M)
