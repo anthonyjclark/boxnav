@@ -65,7 +65,7 @@ class BoxNavigatorBase:
         Returns:
             tuple[Action, Action]: return action taken and correct action.
         """
-        raise NotImplemented
+        raise NotImplemented("This method should only be implemented in the inheriting classes.")
 
     def move_forward(self) -> None:
         """Move forward by a set amount."""
