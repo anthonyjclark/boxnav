@@ -178,12 +178,12 @@ class PerfectNavigator(BoxNavigatorBase):
             self.move_forward()
             action = Action.FORWARD
 
-        # Need to rotate left (thing of unit circle)
+        # Need to rotate left (think of unit circle)
         elif signed_angle_to_target > 0:
             self.rotate_left()
             action = Action.ROTATE_LEFT
 
-        # Need to rotate right (thing of unit circle)
+        # Need to rotate right (think of unit circle)
         else:
             self.rotate_right()
             action = Action.ROTATE_RIGHT
