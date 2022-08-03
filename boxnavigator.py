@@ -123,7 +123,7 @@ class BoxNavigatorBase:
         ax.add_patch(Arrow(self.position.x, self.position.y, dxy.x, dxy.y, color="b"))
 
 
-class Perfecionist(BoxNavigatorBase):
+class PerfectNavigator(BoxNavigatorBase):
     """A "perfect" navigator that does not make mistakes."""
 
     def __init__(self, position: Pt, rotation: float, env: BoxEnv) -> None:
@@ -137,7 +137,7 @@ class Perfecionist(BoxNavigatorBase):
         super().__init__(position, rotation, env)
 
     def take_action(self) -> tuple[Action, Action]:
-        """Determine appropiate action to take 
+        """Determine appropriate action to take.
 
         Returns:
             tuple[Action, Action]: return the action taken and correct action
@@ -167,7 +167,7 @@ class Perfecionist(BoxNavigatorBase):
         return action, action
 
 
-class BoxWanderer(BoxNavigatorBase):
+class WandererNavigator(BoxNavigatorBase):
     """A navigator that wanders in a directed fashion toward the end goal."""
 
     def __init__(self, position: Pt, rotation: float, env: BoxEnv) -> None:
