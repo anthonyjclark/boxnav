@@ -42,11 +42,7 @@ class Pt:
         return Pt(self.x / magnitude, self.y / magnitude)
 
     def magnitude(self) -> float:
-        """Find the magnitude of this 2D vector
-
-        Returns:
-            float: Magnitude of this 2D vector
-        """
+        """Find the magnitude of this 2D vector."""
         return sqrt(self.x * self.x + self.y * self.y)
 
     def angle_between(self, other) -> float:
