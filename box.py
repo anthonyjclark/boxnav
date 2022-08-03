@@ -16,7 +16,7 @@ def approx_equal(a: float, b: float, threshold: float = 0.0001) -> bool:
 
 
 class Pt:
-    """Defines the X and Y values of a point in R^2"""
+    """Defines the x and y values of a point in R^2."""
 
     def __init__(self, x: float, y: float) -> None:
         """Set this Pt's X and Y values.
