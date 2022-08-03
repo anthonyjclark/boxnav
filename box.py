@@ -100,25 +100,14 @@ class Box:
         self.BC = self.C - self.B
         self.dotBC = Pt.scalar_product(self.BC, self.BC)
 
-    @property
-    def origin(self) -> tuple[float, float]:
-        """Origin of the box (bottom-right corner)."""
-        return self.A.x, self.A.y
+        self.origin = self.A.x, self.A.y
+        self.width = Pt.distance(self.B, self.C)
+        self.height = Pt.distance(self.A, self.B)
 
-    @property
-    def width(self) -> float:
-        """Width of this box."""
-        return Pt.distance(self.B, self.C)
-
-    @property
-    def height(self) -> float:
-        """Height of this box."""
-        return Pt.distance(self.A, self.B)
-
-    @property
-    def angle_degrees(self) -> float:
-        """Angle of the box as rotated in the xy-plane."""
-        return 180 - degrees(atan2(self.A.x - self.B.x, self.A.y - self.B.y))
+        # TODO: why 180?
+        self.angle_degrees = 180 - degrees(
+            atan2(self.A.x - self.B.x, self.A.y - self.B.y)
+        )
 
     def point_is_inside(self, M: Pt) -> bool:
         """Determine whether the point is inside of this box.
@@ -131,10 +120,8 @@ class Box:
         """
         AM = M - self.A
         BM = M - self.B
-        AB = self.AB
-        BC = self.BC
-        return (0 <= Pt.scalar_product(AB, AM) <= self.dotAB) and (
-            0 <= Pt.scalar_product(BC, BM) <= self.dotBC
+        return (0 <= Pt.scalar_product(self.AB, AM) <= self.dotAB) and (
+            0 <= Pt.scalar_product(self.BC, BM) <= self.dotBC
         )
 
 
