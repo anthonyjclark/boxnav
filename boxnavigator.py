@@ -60,7 +60,7 @@ class BoxNavigatorBase:
         """Execute a single action in the environment.
 
         Raises:
-            NotImplemented: implement in child classes.
+            NotImplemented: implement in child classes
 
         Returns:
             tuple[Action, Action]: return action taken and correct action.
