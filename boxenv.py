@@ -8,6 +8,11 @@ class BoxEnv:
     """A simple 2D environment of interconnected boxes."""
 
     def __init__(self, boxes: list[Box]) -> None:
+        """Create boxes to be displayed in the display environment.
+
+        Args:
+            boxes (list[Box]): List of boxes to add
+        """
         self.boxes = boxes
 
         # Get scale for plotting
@@ -22,9 +27,22 @@ class BoxEnv:
         self.scale = 0.4 * min(abs(max_x - min_x), abs(max_y - min_y))
 
     def get_boxes(self, pt: Pt) -> list[Box]:
+        """Gives a list of the boxes a Pt is in.
+
+        Args:
+            pt (Pt): Location of wanderer
+
+        Returns:
+            list[Box]: list of boxes a Pt is in
+        """
         return [box for box in self.boxes if box.point_is_inside(pt)]
 
     def display(self, ax: plt.Axes) -> None:
+        """Add Boxes to the display environment.
+
+        Args:
+            ax (plt.Axes): Axis of the display
+        """
         for box in self.boxes:
             ax.add_patch(
                 Rectangle(
@@ -37,6 +55,7 @@ class BoxEnv:
         ax.set_aspect("equal")
 
     def test_display(self) -> None:
+        """Test if the display updates."""
         _, ax = plt.subplots(1, 1)
         self.display(ax)
         plt.show()
