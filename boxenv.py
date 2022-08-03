@@ -5,7 +5,13 @@ from matplotlib.patches import Rectangle
 
 
 class BoxEnv:
-    """A simple 2D environment of interconnected boxes."""
+    """A simple 2D environment of interconnected boxes.
+
+    The intended set of boxes works like this:
+    1. Each box has a target.
+    2. The target should be in an overlapping region between two consecutive boxes.
+    3. The final box includes the final target of the entire environment.
+    """
 
     def __init__(self, boxes: list[Box]) -> None:
         """Create boxes to be displayed in the display environment.
