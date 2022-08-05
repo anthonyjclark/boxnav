@@ -5,7 +5,13 @@ from matplotlib.patches import Rectangle
 
 
 class BoxEnv:
-    """A simple 2D environment of interconnected boxes."""
+    """A simple 2D environment of interconnected boxes.
+
+    The intended set of boxes works like this:
+    1. Each box has a target.
+    2. The target should be in an overlapping region between two consecutive boxes.
+    3. The final box includes the final target of the entire environment.
+    """
 
     def __init__(self, boxes: list[Box]) -> None:
         """Create boxes to be displayed in the display environment.
@@ -16,6 +22,7 @@ class BoxEnv:
         self.boxes = boxes
 
         # Get scale for plotting
+        # TODO: this doesn't work with rotated boxes
         padding = 5
         min_x = min(min(b.A.x, b.B.x, b.C.x) for b in boxes)
         max_x = max(max(b.A.x, b.B.x, b.C.x) for b in boxes)
@@ -62,6 +69,9 @@ class BoxEnv:
 
 
 if __name__ == "__main__":
-    boxes = [Box(Pt(50, 0), Pt(0, 20), Pt(10, 50), Pt(25, 25))]
+    boxes = [
+        Box(Pt(50, 0), Pt(0, 20), Pt(10, 50), Pt(25, 25)),
+        Box(Pt(10, 30), Pt(0, 40), Pt(5, 60), Pt(0, 0)),
+    ]
     env = BoxEnv(boxes)
     env.test_display()

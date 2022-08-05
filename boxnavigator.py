@@ -1,8 +1,10 @@
 from random import Random
 from box import Pt
 from boxenv import BoxEnv
+
 import matplotlib.pyplot as plt
 from matplotlib.patches import Arrow, Wedge
+
 from enum import Enum
 from math import sin, cos, degrees, radians
 
@@ -36,7 +38,11 @@ class Action(Enum):
 
 
 class BoxNavigatorBase:
-    """Base class for box navigators."""
+    """Base class for box navigators.
+
+    A navigator can roam from box to box until it gets to the target
+    location of the final box.
+    """
 
     def __init__(self, position: Pt, rotation: float, env: BoxEnv) -> None:
         """Initialize member variables for any navigator.
@@ -53,11 +59,13 @@ class BoxNavigatorBase:
         self.target = self.env.boxes[0].target
         self.half_target_wedge = radians(5)
 
+        # How much a navigator should translate or rotate in a given step
+        # of the simulation. These are fairly arbitrary.
         self.translation_increment = 1
         self.rotation_increment = radians(2.5)
 
     def at_final_target(self) -> bool:
-        """Is the navigator at the target for the box it is in."""
+        """Is the navigator at the final target."""
         return close_enough(self.position, self.env.boxes[-1].target)
 
     def take_action(self) -> tuple[Action, Action]:
@@ -72,15 +80,15 @@ class BoxNavigatorBase:
         raise NotImplemented(
             "This method should only be implemented in the inheriting classes."
         )
-        
+
     def move_forward(self) -> None:
-        """Move forward by a set amount."""
+        """Move forward by a fixed amount."""
         new_x = self.position.x + self.translation_increment * cos(self.rotation)
         new_y = self.position.y + self.translation_increment * sin(self.rotation)
         self.move(Pt(new_x, new_y))
 
     def move_backward(self) -> None:
-        """Move backward by a set amount."""
+        """Move backward by a fixed amount."""
         new_x = self.position.x - self.translation_increment * cos(self.rotation)
         new_y = self.position.y - self.translation_increment * sin(self.rotation)
         self.move(Pt(new_x, new_y))
@@ -145,26 +153,35 @@ class PerfectNavigator(BoxNavigatorBase):
     def take_action(self) -> tuple[Action, Action]:
         """Determine appropriate action to take.
 
+        This "perfect" navigator rotates toward the general direction
+        of the target, and then moves straight toward the target.
+
         Returns:
             tuple[Action, Action]: return the action taken and correct action
         """
         # 1. Update target if needed
-        surrounding_boxes = self.env.get_boxes(self.position)
-        if close_enough(self.position, self.target) and len(surrounding_boxes) > 1:
-            self.target = surrounding_boxes[-1].target
+        # TODO: move this call since it must always be done.
+        self.update_target_if_needed()
 
-        # 2. Find the correct action
+        # 2. Find the correct action by calculating the angle between the
+        #    target and the heading of the agent.
         heading_vector = Pt(cos(self.rotation), sin(self.rotation)).normalized()
         target_vector = (self.target - self.position).normalized()
         signed_angle_to_target = heading_vector.angle_between(target_vector)
 
         # 3. Take the correct action
+
+        # Already facing correct direction
         if abs(signed_angle_to_target) < self.half_target_wedge:
             self.move_forward()
             action = Action.FORWARD
+
+        # Need to rotate left (thing of unit circle)
         elif signed_angle_to_target > 0:
             self.rotate_left()
             action = Action.ROTATE_LEFT
+
+        # Need to rotate right (thing of unit circle)
         else:
             self.rotate_right()
             action = Action.ROTATE_RIGHT
@@ -173,46 +190,11 @@ class PerfectNavigator(BoxNavigatorBase):
         return action, action
 
 
-class WandererNavigator(BoxNavigatorBase):
+class WanderingNavigator(BoxNavigatorBase):
     """A navigator that wanders in a directed fashion toward the end goal."""
 
     def __init__(self, position: Pt, rotation: float, env: BoxEnv) -> None:
         super().__init__(position, rotation, env)
 
     def take_action(self) -> None:
-        # 1. Update target if needed
-        surrounding_boxes = self.env.get_boxes(self.position)
-        if close_enough(self.position, self.target) and len(surrounding_boxes) > 1:
-            self.target = surrounding_boxes[-1].target
-
-        # 2. Find the correct action
-        heading_vector = Pt(cos(self.rotation), sin(self.rotation)).normalized()
-        target_vector = (self.target - self.position).normalized()
-        signed_angle_to_target = heading_vector.angle_between(target_vector)
-
-        # 3. Take either a random or perfect action.
-        randNumGenerator = Random()
-        isPerfect = bool(randNumGenerator.randint(0, 1))
-        if isPerfect:
-            if abs(signed_angle_to_target) < self.half_target_wedge:
-                self.move_forward()
-                action = Action.FORWARD
-            elif signed_angle_to_target > 0:
-                self.rotate_left()
-                action = Action.ROTATE_LEFT
-            else:
-                self.rotate_right()
-                action = Action.ROTATE_RIGHT
-        else:
-            actionNum = randNumGenerator.randint(0, Action.NUM_ACTIONS.value - 1)
-            if actionNum == 0:
-                self.move_forward()
-                action = Action.FORWARD
-            elif actionNum == 2:
-                self.rotate_left()
-                action = Action.ROTATE_LEFT
-            else:
-                self.rotate_right()
-                action = Action.ROTATE_RIGHT
-
-        return action, action
+        raise NotImplemented
