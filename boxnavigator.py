@@ -14,7 +14,7 @@ def close_enough(A: Pt, B: Pt, threshold: float = 1) -> bool:
     Args:
         A (Pt): First Pt to compare
         B (Pt): Second Pt to compare
-        threshold (float, optional): How close Pt A has to be to Pt B to be considered "close enough". Defaults to 1.
+        threshold (float, optional): Distance to be considered close enough. Defaults to 1.
 
     Returns:
         bool: Is Pt A close enough to Pt B given a threshold
@@ -53,6 +53,8 @@ class BoxNavigatorBase:
         self.rotation = rotation
 
         self.target = self.env.boxes[0].target
+
+        # TODO: change from wedge to field-of-view?
         self.half_target_wedge = radians(5)
 
         # How much a navigator should translate or rotate in a given step
