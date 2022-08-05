@@ -69,6 +69,7 @@ class BoxNavigatorBase:
 
     def correct_action(self):
         # TODO: docstring
+        # TODO: cache this result?
 
         # Find the correct action by calculating the angle between the
         # target and the heading of the agent.
@@ -98,17 +99,21 @@ class BoxNavigatorBase:
         """
         self.update_target_if_needed()
 
-        action_taken, correct_action = self.navigator_specific_action()
+        action_taken = self.navigator_specific_action()
+        correct_action = self.correct_action()
+
         if action_taken == Action.FORWARD:
             self.move_forward()
         elif action_taken == Action.ROTATE_LEFT:
             self.rotate_left()
         elif action_taken == Action.ROTATE_RIGHT:
             self.rotate_right()
+        else:
+            self.move_backward()
 
         return action_taken, correct_action
 
-    def navigator_specific_action(self) -> tuple[Action, Action]:
+    def navigator_specific_action(self) -> Action:
         """
         Raises:
             NotImplemented: implement in child classes
@@ -193,22 +198,15 @@ class PerfectNavigator(BoxNavigatorBase):
         """
         super().__init__(position, rotation, env)
 
-    def navigator_specific_action(self) -> tuple[Action, Action]:
-        """Determine appropriate action to take.
-
-        This "perfect" navigator rotates toward the general direction
-        of the target, and then moves straight toward the target.
-
-        Returns:
-            tuple[Action, Action]: return the action taken and correct action
-        """
-        action = self.correct_action()
-        # The boy scout always chooses the "correct" action
-        return action, action
+    def navigator_specific_action(self) -> Action:
+        """The perfect navigator always chooses the correct action."""
+        return self.correct_action()
 
 
 class WanderingNavigator(BoxNavigatorBase):
     """A navigator that wanders in a directed fashion toward the end goal."""
+
+    # TODO: rename this
 
     def __init__(self, position: Pt, rotation: float, env: BoxEnv) -> None:
         super().__init__(position, rotation, env)
@@ -221,15 +219,10 @@ class WanderingNavigator(BoxNavigatorBase):
         # TODO: make this a parameter
         self.chance_of_random_action = 0.5
 
-    def navigator_specific_action(self) -> tuple[Action, Action]:
-
-        # Take either a random or perfect action.
-        correct_action = self.correct_action()
-        take_random_action = random() < self.chance_of_random_action
-
-        if take_random_action:
-            action_to_take = choice(self.possible_actions)
-        else:
-            action_to_take = correct_action
-
-        return action_to_take, correct_action
+    def navigator_specific_action(self) -> Action:
+        # Take a random action some percent of the time
+        return (
+            choice(self.possible_actions)
+            if random() < self.chance_of_random_action
+            else self.correct_action()
+        )

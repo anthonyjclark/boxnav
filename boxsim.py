@@ -37,7 +37,8 @@ def simulate():
 
     num_actions_taken = 0
     while not agent.at_final_target():
-        agent.take_action()
+        action_taken, correct_action = agent.take_action()
+        # TODO: use "correct_action" to label the image
 
         env.display(ax)
         agent.display(ax, env.scale)
