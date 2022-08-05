@@ -8,8 +8,6 @@ from matplotlib.patches import Arrow, Wedge
 from enum import Enum
 from math import sin, cos, degrees, radians
 
-NUM_ACTIONS = 4
-
 
 def close_enough(A: Pt, B: Pt, threshold: float = 1) -> bool:
     """Determine whether Pt A is close enough to Pt B depending on the threshold value.
