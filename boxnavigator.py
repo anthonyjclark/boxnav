@@ -1,4 +1,4 @@
-from random import Random
+from random import random, choice
 from box import Pt
 from boxenv import BoxEnv
 
@@ -28,7 +28,6 @@ def close_enough(A: Pt, B: Pt, threshold: float = 1) -> bool:
 class Action(Enum):
     """Simple class with 4 possible actions."""
 
-    NUM_ACTIONS = 4
     FORWARD = 0
     BACKWARD = 1
     ROTATE_LEFT = 2
@@ -68,14 +67,51 @@ class BoxNavigatorBase:
         """Is the navigator at the final target."""
         return close_enough(self.position, self.env.boxes[-1].target)
 
+    def correct_action(self):
+        # TODO: docstring
+
+        # Find the correct action by calculating the angle between the
+        # target and the heading of the agent.
+        heading_vector = Pt(cos(self.rotation), sin(self.rotation)).normalized()
+        target_vector = (self.target - self.position).normalized()
+        signed_angle_to_target = heading_vector.angle_between(target_vector)
+
+        # Already facing correct direction
+        if abs(signed_angle_to_target) < self.half_target_wedge:
+            action = Action.FORWARD
+
+        # Need to rotate left (think of unit circle)
+        elif signed_angle_to_target > 0:
+            action = Action.ROTATE_LEFT
+
+        # Need to rotate right (think of unit circle)
+        else:
+            action = Action.ROTATE_RIGHT
+
+        return action
+
     def take_action(self) -> tuple[Action, Action]:
         """Execute a single action in the environment.
 
-        Raises:
-            NotImplemented: implement in child classes
-
         Returns:
             tuple[Action, Action]: return action taken and correct action.
+        """
+        self.update_target_if_needed()
+
+        action_taken, correct_action = self.navigator_specific_action()
+        if action_taken == Action.FORWARD:
+            self.move_forward()
+        elif action_taken == Action.ROTATE_LEFT:
+            self.rotate_left()
+        elif action_taken == Action.ROTATE_RIGHT:
+            self.rotate_right()
+
+        return action_taken, correct_action
+
+    def navigator_specific_action(self) -> tuple[Action, Action]:
+        """
+        Raises:
+            NotImplemented: implement in child classes
         """
         raise NotImplemented(
             "This method should only be implemented in the inheriting classes."
@@ -113,7 +149,8 @@ class BoxNavigatorBase:
             self.position = new_pt
         else:
             # TODO: project to boundary?
-            print("out of bounds")
+            # raise NotImplementedError("Jumping out of bounds is not implemented.")
+            pass
 
     def rotate_right(self) -> None:
         """Rotate to the right by a set amount."""
@@ -156,7 +193,7 @@ class PerfectNavigator(BoxNavigatorBase):
         """
         super().__init__(position, rotation, env)
 
-    def take_action(self) -> tuple[Action, Action]:
+    def navigator_specific_action(self) -> tuple[Action, Action]:
         """Determine appropriate action to take.
 
         This "perfect" navigator rotates toward the general direction
@@ -165,33 +202,7 @@ class PerfectNavigator(BoxNavigatorBase):
         Returns:
             tuple[Action, Action]: return the action taken and correct action
         """
-        # 1. Update target if needed
-        # TODO: move this call since it must always be done.
-        self.update_target_if_needed()
-
-        # 2. Find the correct action by calculating the angle between the
-        #    target and the heading of the agent.
-        heading_vector = Pt(cos(self.rotation), sin(self.rotation)).normalized()
-        target_vector = (self.target - self.position).normalized()
-        signed_angle_to_target = heading_vector.angle_between(target_vector)
-
-        # 3. Take the correct action
-
-        # Already facing correct direction
-        if abs(signed_angle_to_target) < self.half_target_wedge:
-            self.move_forward()
-            action = Action.FORWARD
-
-        # Need to rotate left (think of unit circle)
-        elif signed_angle_to_target > 0:
-            self.rotate_left()
-            action = Action.ROTATE_LEFT
-
-        # Need to rotate right (think of unit circle)
-        else:
-            self.rotate_right()
-            action = Action.ROTATE_RIGHT
-
+        action = self.correct_action()
         # The boy scout always chooses the "correct" action
         return action, action
 
@@ -201,41 +212,24 @@ class WanderingNavigator(BoxNavigatorBase):
 
     def __init__(self, position: Pt, rotation: float, env: BoxEnv) -> None:
         super().__init__(position, rotation, env)
+        self.possible_actions = [
+            Action.FORWARD,
+            Action.ROTATE_LEFT,
+            Action.ROTATE_RIGHT,
+        ]
 
-    def take_action(self) -> None:
-        # 1. Update target if needed
-        surrounding_boxes = self.env.get_boxes(self.position)
-        if close_enough(self.position, self.target) and len(surrounding_boxes) > 1:
-            self.target = surrounding_boxes[-1].target
+        # TODO: make this a parameter
+        self.chance_of_random_action = 0.5
 
-        # 2. Find the correct action
-        heading_vector = Pt(cos(self.rotation), sin(self.rotation)).normalized()
-        target_vector = (self.target - self.position).normalized()
-        signed_angle_to_target = heading_vector.angle_between(target_vector)
+    def navigator_specific_action(self) -> tuple[Action, Action]:
 
-        # 3. Take either a random or perfect action.
-        randNumGenerator = Random()
-        isPerfect = bool(randNumGenerator.randint(0, 1))
-        if isPerfect:
-            if abs(signed_angle_to_target) < self.half_target_wedge:
-                self.move_forward()
-                action = Action.FORWARD
-            elif signed_angle_to_target > 0:
-                self.rotate_left()
-                action = Action.ROTATE_LEFT
-            else:
-                self.rotate_right()
-                action = Action.ROTATE_RIGHT
+        # Take either a random or perfect action.
+        correct_action = self.correct_action()
+        take_random_action = random() < self.chance_of_random_action
+
+        if take_random_action:
+            action_to_take = choice(self.possible_actions)
         else:
-            actionNum = randNumGenerator.randint(0, Action.NUM_ACTIONS.value - 1)
-            if actionNum == 0:
-                self.move_forward()
-                action = Action.FORWARD
-            elif actionNum == 2:
-                self.rotate_left()
-                action = Action.ROTATE_LEFT
-            else:
-                self.rotate_right()
-                action = Action.ROTATE_RIGHT
+            action_to_take = correct_action
 
-        return action, action
+        return action_to_take, correct_action

@@ -1,7 +1,6 @@
 from box import Box, Pt
 from boxenv import BoxEnv
-from boxnavigator import PerfectNavigator
-from boxnavigator import WandererNavigator
+from boxnavigator import PerfectNavigator, WanderingNavigator
 
 from celluloid import Camera
 import matplotlib.pyplot as plt
@@ -22,12 +21,21 @@ boxes = [
 def simulate():
     """Create and update the box environment and run the navigator."""
     env = BoxEnv(boxes)
-    # agent = PerfectNavigator(Pt(2, 2), radians(0), env)
-    agent = WandererNavigator(Pt(2, 2), radians(0), env)
+
+    agent_position = Pt(2, 2)
+    agent_rotation = 0
+
+    if args.navigator == "wandering":
+        agent = WanderingNavigator(agent_position, agent_rotation, env)
+    elif args.navigator == "perfect":
+        agent = PerfectNavigator(agent_position, agent_rotation, env)
+    else:
+        raise ValueError("Invalid argument error (check code for options).")
 
     fig, ax = plt.subplots()
     camera = Camera(fig)
 
+    num_actions_taken = 0
     while not agent.at_final_target():
         agent.take_action()
 
@@ -35,7 +43,11 @@ def simulate():
         agent.display(ax, env.scale)
         camera.snap()
 
-    print("Simulation complete. Now creating output.")
+        num_actions_taken += 1
+
+    print(
+        f"Simulation complete, it took {num_actions_taken} actions to reach the end. Now creating output."
+    )
 
     anim = camera.animate()
     anim.save("output." + args.save_ext)
@@ -43,6 +55,9 @@ def simulate():
 
 argparser = ArgumentParser("Navigate around a box environment.")
 argparser.add_argument("save_ext", type=str, help="Extension for output format.")
+argparser.add_argument(
+    "--navigator", type=str, default="perfect", help="Navigator to use."
+)
 args = argparser.parse_args()
 
 simulate()
