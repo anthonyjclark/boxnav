@@ -1,3 +1,4 @@
+from random import Random
 from box import Pt
 from boxenv import BoxEnv
 
@@ -27,6 +28,7 @@ def close_enough(A: Pt, B: Pt, threshold: float = 1) -> bool:
 class Action(Enum):
     """Simple class with 4 possible actions."""
 
+    NUM_ACTIONS = 4
     FORWARD = 0
     BACKWARD = 1
     ROTATE_LEFT = 2
@@ -109,7 +111,7 @@ class BoxNavigatorBase:
             self.position = new_pt
         else:
             # TODO: project to boundary?
-            raise NotImplemented
+            print("out of bounds")
 
     def rotate_right(self) -> None:
         """Rotate to the right by a set amount."""
@@ -199,5 +201,39 @@ class WanderingNavigator(BoxNavigatorBase):
         super().__init__(position, rotation, env)
 
     def take_action(self) -> None:
-        # return action_taken, correct_action
-        raise NotImplemented
+        # 1. Update target if needed
+        surrounding_boxes = self.env.get_boxes(self.position)
+        if close_enough(self.position, self.target) and len(surrounding_boxes) > 1:
+            self.target = surrounding_boxes[-1].target
+
+        # 2. Find the correct action
+        heading_vector = Pt(cos(self.rotation), sin(self.rotation)).normalized()
+        target_vector = (self.target - self.position).normalized()
+        signed_angle_to_target = heading_vector.angle_between(target_vector)
+
+        # 3. Take either a random or perfect action.
+        randNumGenerator = Random()
+        isPerfect = bool(randNumGenerator.randint(0, 1))
+        if isPerfect:
+            if abs(signed_angle_to_target) < self.half_target_wedge:
+                self.move_forward()
+                action = Action.FORWARD
+            elif signed_angle_to_target > 0:
+                self.rotate_left()
+                action = Action.ROTATE_LEFT
+            else:
+                self.rotate_right()
+                action = Action.ROTATE_RIGHT
+        else:
+            actionNum = randNumGenerator.randint(0, Action.NUM_ACTIONS.value - 1)
+            if actionNum == 0:
+                self.move_forward()
+                action = Action.FORWARD
+            elif actionNum == 2:
+                self.rotate_left()
+                action = Action.ROTATE_LEFT
+            else:
+                self.rotate_right()
+                action = Action.ROTATE_RIGHT
+
+        return action, action
