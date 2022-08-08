@@ -69,7 +69,7 @@ def simulate():
     )
 
     anim = camera.animate()
-    anim.save("output." + args.save_ext)
+    anim.save("output." + args.save_ext)  # type: ignore
 
 
 argparser = ArgumentParser("Navigate around a box environment.")
