@@ -41,7 +41,9 @@ class BoxNavigatorBase:
     location of the final box.
     """
 
-    def __init__(self, position: Pt, rotation: float, env: BoxEnv) -> None:
+    def __init__(
+        self, position: Pt, rotation: float, env: BoxEnv, out_of_bounds: bool
+    ) -> None:
         """Initialize member variables for any navigator.
 
         Args:
@@ -52,6 +54,7 @@ class BoxNavigatorBase:
         self.env = env
         self.position = position
         self.rotation = rotation
+        self.allow_out_of_bounds = out_of_bounds
 
         self.target = self.env.boxes[0].target
 
@@ -60,12 +63,15 @@ class BoxNavigatorBase:
 
         # How much a navigator should translate or rotate in a given step
         # of the simulation. These are fairly arbitrary.
-        self.translation_increment = 1
-        self.rotation_increment = radians(2.5)
+        self.distance_threshold = 15
+        self.translation_increment = 10
+        self.rotation_increment = radians(5)
 
     def at_final_target(self) -> bool:
         """Is the navigator at the final target."""
-        return close_enough(self.position, self.env.boxes[-1].target)
+        return close_enough(
+            self.position, self.env.boxes[-1].target, self.distance_threshold
+        )
 
     def correct_action(self):
         # TODO: docstring
@@ -111,6 +117,10 @@ class BoxNavigatorBase:
         else:
             self.move_backward()
 
+        # self.sync_position_with_unreal()
+        # "vget /camera/0/location"
+        # update self.position
+
         return action_taken, correct_action
 
     def navigator_specific_action(self) -> Action:
@@ -150,12 +160,11 @@ class BoxNavigatorBase:
             NotImplemented: position is not valid
         """
 
-        if self.env.get_boxes(new_pt):
+        if self.allow_out_of_bounds or self.env.get_boxes(new_pt):
             self.position = new_pt
         else:
             # TODO: project to boundary?
-            # raise NotImplementedError("Jumping out of bounds is not implemented.")
-            pass
+            raise NotImplementedError("Projecting to boundary is not implemented.")
 
     def rotate_right(self) -> None:
         """Rotate to the right by a set amount."""
@@ -188,7 +197,9 @@ class BoxNavigatorBase:
 class PerfectNavigator(BoxNavigatorBase):
     """A "perfect" navigator that does not make mistakes."""
 
-    def __init__(self, position: Pt, rotation: float, env: BoxEnv) -> None:
+    def __init__(
+        self, position: Pt, rotation: float, env: BoxEnv, out_of_bounds: bool
+    ) -> None:
         """Initialize navigator position, initial orientation, and associated Box environment.
 
         Args:
@@ -196,7 +207,7 @@ class PerfectNavigator(BoxNavigatorBase):
             rotation (float): Initial rotation of the navigator
             env (BoxEnv): Box Environment navigator will operate in
         """
-        super().__init__(position, rotation, env)
+        super().__init__(position, rotation, env, out_of_bounds)
 
     def navigator_specific_action(self) -> Action:
         """The perfect navigator always chooses the correct action."""
@@ -208,8 +219,10 @@ class WanderingNavigator(BoxNavigatorBase):
 
     # TODO: rename this
 
-    def __init__(self, position: Pt, rotation: float, env: BoxEnv) -> None:
-        super().__init__(position, rotation, env)
+    def __init__(
+        self, position: Pt, rotation: float, env: BoxEnv, out_of_bounds: bool
+    ) -> None:
+        super().__init__(position, rotation, env, out_of_bounds)
         self.possible_actions = [
             Action.FORWARD,
             Action.ROTATE_LEFT,
