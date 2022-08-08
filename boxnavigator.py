@@ -110,16 +110,24 @@ class BoxNavigatorBase:
 
         if action_taken == Action.FORWARD:
             self.move_forward()
+            # self.sync_position_with_unreal()
+            # "vget /camera/0/location"
+            # update self.position
+            # TODO: only sync when it is possible that we went out of bounds?
+            # TODO: should we have a member parameter that turns syncing off?
+            #       because we probably won't need to with the perfect navigator
+
         elif action_taken == Action.ROTATE_LEFT:
             self.rotate_left()
         elif action_taken == Action.ROTATE_RIGHT:
             self.rotate_right()
         else:
             self.move_backward()
+            # self.sync_position_with_unreal()
+            # "vget /camera/0/location"
+            # update self.position
 
-        # self.sync_position_with_unreal()
-        # "vget /camera/0/location"
-        # update self.position
+        # Sync rotation every so many steps?
 
         return action_taken, correct_action
 
