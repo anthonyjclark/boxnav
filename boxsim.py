@@ -53,6 +53,8 @@ def simulate():
 
     while not agent.at_final_target():
         action_taken, correct_action = agent.take_action()
+        print(agent.position.xy)
+        print(ue5.getCameraLocation(0))
 
         # if action_taken == Action.FORWARD:
         #     ue5.forward(agent.translation_increment)
