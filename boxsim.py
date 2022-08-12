@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 # TODO: update to reflect OldenborgUE
 boxes = [
     Box(Pt(420, -350), Pt(-190, -350), Pt(-190, 1070), Pt(115, 1020)),
-    Box(Pt(-860, 240), Pt(-190, 240), Pt(-190, 600), Pt(-400, 440))
+    Box(Pt(-860, 400), Pt(-190, 400), Pt(-190, 900), Pt(-400, 650))
     # Box(Pt(1070, -190), Pt(-350, -190), Pt(-350, 420), Pt(900, 315)),
     # Box(Pt(240, -860), Pt(240, -190), Pt(610, -190), Pt(400, -440)),
     # Box(Pt(240, -450), Pt(-240, -190), Pt(1070, -190), Pt(500, 115)),
@@ -48,13 +48,11 @@ def simulate():
     camera = Camera(fig)
 
     # TODO: turn into CLI argument
-    max_actions_to_take = 20
+    max_actions_to_take = 40
     num_actions_taken = 0
 
     while not agent.at_final_target():
         action_taken, correct_action = agent.take_action()
-        print(agent.position.xy)
-        print(ue5.getCameraLocation(0))
 
         # if action_taken == Action.FORWARD:
         #     ue5.forward(agent.translation_increment)
