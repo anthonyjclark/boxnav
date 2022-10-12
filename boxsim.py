@@ -58,6 +58,7 @@ def simulate():
 
         env.display(ax)
         agent.display(ax, env.scale)
+        ax.invert_xaxis()
         camera.snap()
 
         num_actions_taken += 1
